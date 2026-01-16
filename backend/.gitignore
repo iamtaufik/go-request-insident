@@ -1,0 +1,41 @@
+.env
+### Go ###
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+# Environment files
+# It is common to ignore .env files or sensitive configuration files
+# and use environment variables for configuration in production.
+.env
+.env.*
+configs/*.env
+secret.md
+
+# Log files, temporary files, build artifacts
+*.log
+tmp/
+logs.txt
+
+# Editor/OS specific files (optional, but often helpful)
+.idea/         # JetBrains IDEs
+.vscode/
+.DS_Store      # macOS
+
+# Build artifacts (if you build your binary in a specific directory)
+/build
+/dist
