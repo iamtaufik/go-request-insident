@@ -1,23 +1,26 @@
 package usecase
 
 import (
+	"be-request-insident/internal/logger"
 	"be-request-insident/internal/models"
 	"be-request-insident/internal/repository"
 	"be-request-insident/utility"
+	"context"
 	"errors"
 	"log"
 )
 
 
-type userUsecase struct {
+type AuthUsecase struct {
 	userRepo repository.UserRepository
+	appLog logger.Logger
 }
 
-func NewUserUsecase(userRepo repository.UserRepository) *userUsecase {
-	return &userUsecase{userRepo: userRepo}
+func NewAuthUseCase(userRepo repository.UserRepository, appLog logger.Logger) *AuthUsecase {
+	return &AuthUsecase{userRepo: userRepo, appLog: appLog}
 }
 
-func (u *userUsecase) Login(username, password string) (string, string, error) {
+func (u *AuthUsecase) Login(ctx context.Context, username, password string) (string, string, error) {
 	isExist, err := u.userRepo.GetUserByUsername(username)
 
 	if err != nil {
@@ -33,6 +36,9 @@ func (u *userUsecase) Login(username, password string) (string, string, error) {
 
 	if !isMatch {
 		log.Printf("Password does not match for user: %s", username)
+		u.appLog.Error(ctx, "LOGIN_FAILED", "invalid password attempt", nil, map[string]interface{}{
+			"username": username,
+		})
 		return "", "", errors.New("invalid credentials")
 	}
 
@@ -49,7 +55,7 @@ func (u *userUsecase) Login(username, password string) (string, string, error) {
 	return accessToken, refreshToken, nil 
 }
 
-func (u *userUsecase) Me(userID string) (*models.User, error) {
+func (u *AuthUsecase) Me(userID string) (*models.User, error) {
 	user, err := u.userRepo.GetUserByID(userID)
 	if err != nil {
 		return nil, errors.New("user not found")

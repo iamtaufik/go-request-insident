@@ -3,6 +3,7 @@ package repository
 import (
 	"be-request-insident/internal/models"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -16,10 +17,11 @@ type UserRepository interface {
 
 type userRepository struct {
 	DB *gorm.DB
+	redis *redis.Client
 }
 
-func NewUserRepository(db *gorm.DB) *userRepository {
-	return &userRepository{DB: db}
+func NewUserRepository(db *gorm.DB, redis *redis.Client) UserRepository {
+	return &userRepository{DB: db, redis: redis}
 }
 
 func (r *userRepository) GetUserByID(id string) (*models.User, error) {

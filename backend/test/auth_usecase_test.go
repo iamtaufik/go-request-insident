@@ -1,6 +1,7 @@
 package usecase_test
 
 import (
+	"be-request-insident/internal/logger"
 	"be-request-insident/internal/models"
 	"be-request-insident/internal/usecase"
 	"be-request-insident/internal/usecase/mocks"
@@ -28,9 +29,9 @@ func TestAuthUsecase_Login_Success(t *testing.T) {
 		},
 	}
 
-	uc := usecase.NewUserUsecase(mockRepo)
+	uc := usecase.NewAuthUseCase(mockRepo, logger.NoopLogger{})
 
-	access, refresh, err := uc.Login("test@mail.com", "secret123")
+	access, refresh, err := uc.Login(t.Context(), "test@mail.com", "secret123")
 
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
@@ -60,9 +61,9 @@ func TestAuthUsecase_Login_InvalidPassword(t *testing.T) {
 		},
 	}
 
-	uc := usecase.NewUserUsecase(mockRepo)
+	uc := usecase.NewAuthUseCase(mockRepo, logger.NoopLogger{})
 
-	_, _, err := uc.Login("test@mail.com", "wrongpass")
+	_, _, err := uc.Login(t.Context(),"test@mail.com", "wrongpass")
 	if err == nil || err.Error() != "invalid credentials" {
 		t.Fatalf("expected invalid credentials, got %v", err)
 	}

@@ -26,3 +26,19 @@ func GenerateRefreshToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	return token.SignedString([]byte(config.GetEnvVariable("JWT_REFRESH_KEY")))
 }
+
+func ParseToken(tokenString, secretKey string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, jwt.ErrTokenInvalidClaims
+}

@@ -33,16 +33,16 @@ type LogError struct {
 	Message string `bson:"message,omitempty"`
 }
 
-type AppLogger struct {
+type MongoLogger struct {
 	coll    *mongo.Collection
 	service string
 }
 
-func NewAppLogger(coll *mongo.Collection, service string) *AppLogger {
-	return &AppLogger{coll: coll, service: service}
+func NewAppLogger(coll *mongo.Collection, service string) *MongoLogger {
+	return &MongoLogger{coll: coll, service: service}
 }
 
-func (l *AppLogger) Log(ctx context.Context, log AppLog) {
+func (l *MongoLogger) Log(ctx context.Context, log AppLog) {
 	log.TS = time.Now()
 	log.Service = l.service
 
@@ -52,7 +52,7 @@ func (l *AppLogger) Log(ctx context.Context, log AppLog) {
 	_, _ = l.coll.InsertOne(cctx, log)
 }
 
-func (l *AppLogger) Error(ctx context.Context, event, msg string, err error, meta map[string]interface{}) {
+func (l *MongoLogger) Error(ctx context.Context, event, msg string, err error, meta map[string]interface{}) {
 	le := &LogError{}
 	if err != nil {
 		le.Type = "error"
