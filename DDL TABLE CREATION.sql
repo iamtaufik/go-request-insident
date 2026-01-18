@@ -45,6 +45,10 @@ CREATE TABLE service_requests (
   KEY idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE service_requests
+ADD COLUMN deleted_at DATETIME NULL DEFAULT NULL
+AFTER updated_at;
+
 
 CREATE TABLE service_request_attachments (
   id CHAR(36) NOT NULL,
@@ -83,12 +87,10 @@ CREATE TABLE user_sessions (
    id CHAR(36) NOT NULL,
   user_id CHAR(36) NOT NULL,
 
-  -- random id sesi (boleh dipakai sebagai "sid" claim di JWT access token)
   session_id CHAR(64) NOT NULL,
 
   status VARCHAR(100) NOT NULL,
 
-  -- refresh token: simpan HASH saja (misal SHA-256 atau bcrypt/argon2)
   refresh_token_hash VARCHAR(255) NOT NULL,
   refresh_expires_at DATETIME NOT NULL,
 

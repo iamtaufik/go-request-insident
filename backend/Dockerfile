@@ -1,11 +1,29 @@
-FROM golang:1.25-alpine
+FROM golang:1.25-alpine AS builder
 
-WORKDIR /app
-RUN apk add --no-cache git
+WORKDIR /src
+RUN apk add --no-cache git ca-certificates
 
 COPY go.mod go.sum ./
 RUN go mod download
+
 COPY . .
 
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -trimpath -ldflags="-s -w" \
+    -o /out/api ./cmd/api
+FROM alpine:3.20
+
+WORKDIR /app
+RUN apk add --no-cache ca-certificates && update-ca-certificates
+
+RUN adduser -D -H -s /sbin/nologin appuser \
+ && mkdir -p /app/logs \
+ && chown -R appuser:appuser /app
+USER appuser
+
+
+COPY --from=builder /out/api ./api
+
 EXPOSE 3000
-CMD ["go", "run", "main.go"]
+
+CMD ["./api"]

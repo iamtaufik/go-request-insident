@@ -105,3 +105,15 @@ func (u *ServiceRequestUsecase) AttachFileToServiceRequest(ctx context.Context, 
 func (u *ServiceRequestUsecase) GetAttachmentsByServiceRequestID(ctx context.Context, serviceRequestID string) ([]*models.ServiceRequestAttachment, error) {
 	return u.attachmentRepo.GetAttachmentsByRequestID(ctx, serviceRequestID)
 }
+
+func (u *ServiceRequestUsecase) DeleteServiceRequest(ctx context.Context, serviceRequestID string) error {
+	serviceRequest, err := u.serviceRequestRepo.GetServiceRequestByID(ctx, serviceRequestID)
+	if err != nil {
+		return errors.New("service request not found")
+	}
+
+	now := time.Now()
+	serviceRequest.DeletedAt = &now
+
+	return u.serviceRequestRepo.UpdateServiceRequest(ctx, serviceRequest)
+}

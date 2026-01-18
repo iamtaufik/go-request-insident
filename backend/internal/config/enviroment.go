@@ -8,6 +8,10 @@ import (
 )
 
 func LoadEnv() {
+	if os.Getenv("APP_ENV") == "production" || os.Getenv("DOCKER") == "true" {
+		return
+	}
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)

@@ -14,7 +14,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD} --silent",
+          "mysqladmin ping -h localhost -uroot -ptaufikdev --silent",
         ]
       interval: 5s
       timeout: 5s
@@ -39,31 +39,41 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./backend/:/app
-  #   environment:
-  #     AIR_WATCHER: poll
-  #     APP_PORT: 3000
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      APP_ENV: production
 
-  #     # MySQL DSN (umum untuk driver go-sql-driver/mysql)
-  #     # format: user:pass@tcp(host:port)/db?params
-  #     MYSQL_DSN: "${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(mysql:3306)/${MYSQL_DATABASE}?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci"
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: taufikdev
+      MYSQL_PASSWORD: taufikdev
+      MYSQL_ROOT_PASSWORD: taufikdev
+      MYSQL_PORT: "3306"
+      MYSQL_HOST: mysql
 
-  #     REDIS_ADDR: "redis:6379"
-  #     MONGO_URI: "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/${MONGO_INITDB_DATABASE}?authSource=admin"
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     mysql:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_started
-  #     mongo:
-  #       condition: service_started
+      REDIS_PORT: "6379"
+      REDIS_ADDR: redis
+      REDIS_DB: "0"
+
+      MONGO_INITDB_DATABASE: taufikdev
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: mongopass
+      MONGO_PORT: "27017"
+      MONGO_HOST: mongo
+
+      JWT_SECRET_KEY: your_jwt_secret_key
+      JWT_REFRESH_KEY: your_jwt_refresh_secret_key
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mongo:
+        condition: service_started
 
   # frontend:
   #   build:

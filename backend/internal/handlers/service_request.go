@@ -164,3 +164,18 @@ func (h *ServiceRequestHandler) GetAttachemnts(c *fiber.Ctx) error {
 
 	return c.JSON(attachemnts)
 }
+
+func (h *ServiceRequestHandler) DeleteServiceRequest(c *fiber.Ctx) error {
+	serviceRequestId := c.Params("id")
+
+	err := h.UseCase.DeleteServiceRequest(c.Context(), serviceRequestId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to delete service request",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "service request deleted successfully",
+	})
+}
