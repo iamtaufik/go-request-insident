@@ -16,3 +16,10 @@ type UpdateServiceRequestPayload struct {
 	Summary      string `json:"summary" binding:"required"`
 	Note         string `json:"note" binding:"required"`
 }
+
+type ServiceRequestAttachmentPayload struct {
+	FileName string `json:"file_name" binding:"required"`
+	FileURL  string `json:"file_url" binding:"required"`
+	FileType string `json:"file_type" binding:"required"`
+	FileSize int64  `json:"file_size" binding:"required"`
+}

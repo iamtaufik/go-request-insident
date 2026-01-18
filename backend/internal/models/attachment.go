@@ -10,4 +10,6 @@ type ServiceRequestAttachment struct {
 	MimeType         string    `gorm:"column:mime_type" json:"mime_type"`
 	FileSize         int64     `gorm:"column:file_size" json:"file_size"`
 	UploadedAt       time.Time `gorm:"column:uploaded_at;not null" json:"uploaded_at"`
+
+	ServiceRequest   ServiceRequest `gorm:"foreignKey:ServiceRequestID;references:ID" json:"-"`
 }

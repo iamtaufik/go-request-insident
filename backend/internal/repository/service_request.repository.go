@@ -8,7 +8,7 @@ import (
 )
 
 type ServiceRequestRepository interface {
-	GetServiceRequests(ctx context.Context) (*[]models.ServiceRequest, error)
+	GetServiceRequests(ctx context.Context) ([]*models.ServiceRequest, error)
 	GetServiceRequestByID(ctx context.Context, id string) (*models.ServiceRequest, error)
 	CreateServiceRequest(ctx context.Context, serviceRequest *models.ServiceRequest) error
 	UpdateServiceRequest(ctx context.Context, serviceRequest *models.ServiceRequest) error
@@ -25,13 +25,13 @@ func NewServiceRequestRepository(db *gorm.DB, cache Cache) ServiceRequestReposit
 }
 
 
-func (r *serviceRequestRepository) GetServiceRequests(ctx context.Context) (*[]models.ServiceRequest, error) {
-	var serviceRequests []models.ServiceRequest
+func (r *serviceRequestRepository) GetServiceRequests(ctx context.Context) ([]*models.ServiceRequest, error) {
+	var serviceRequests []*models.ServiceRequest
 
 	if err := r.DB.Find(&serviceRequests).Error; err != nil {
 		return nil, err
 	}
-	return &serviceRequests, nil
+	return serviceRequests, nil
 }
 
 func (r *serviceRequestRepository) CreateServiceRequest(ctx context.Context, serviceRequest *models.ServiceRequest) error {

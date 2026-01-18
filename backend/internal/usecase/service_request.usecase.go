@@ -15,10 +15,11 @@ import (
 
 type ServiceRequestUsecase struct {
 	serviceRequestRepo repository.ServiceRequestRepository
+	attachmentRepo repository.AttachmentRepository
 }
 
-func NewServiceRequestUsecase(serviceRequestRepo repository.ServiceRequestRepository) *ServiceRequestUsecase {
-	return &ServiceRequestUsecase{serviceRequestRepo: serviceRequestRepo}
+func NewServiceRequestUsecase(serviceRequestRepo repository.ServiceRequestRepository, attachmentRepo repository.AttachmentRepository) *ServiceRequestUsecase {
+	return &ServiceRequestUsecase{serviceRequestRepo: serviceRequestRepo, attachmentRepo: attachmentRepo}
 }
 
 func slaPrefix(slaType string) string {
@@ -34,7 +35,7 @@ func generateCodeBySLAType(slaType string, seq int) string {
 	return fmt.Sprintf("%s-%04d", slaPrefix(slaType), seq)
 }
 
-func (u *ServiceRequestUsecase) ListServiceRequests(ctx context.Context) (*[]models.ServiceRequest, error) {
+func (u *ServiceRequestUsecase) ListServiceRequests(ctx context.Context) ([]*models.ServiceRequest, error) {
 	return u.serviceRequestRepo.GetServiceRequests(ctx)
 }
 
@@ -56,7 +57,7 @@ func (u *ServiceRequestUsecase) DraftServiceRequest(ctx context.Context, draftSe
 		return err
 	}
 
-	serviceRequest.RequestCode = generateCodeBySLAType(draftServiceRequest.SLAType, nextSeq)
+	serviceRequest.RequestCode = generateCodeBySLAType(draftServiceRequest.RequestType, nextSeq)
 
 	return u.serviceRequestRepo.CreateServiceRequest(ctx, serviceRequest)
 }
@@ -83,4 +84,24 @@ func (u *ServiceRequestUsecase) UpdateServiceRequest(ctx context.Context, servic
 	}
 
 	return nil
+}
+
+func (u *ServiceRequestUsecase) GetServiceRequestByID(ctx context.Context, serviceRequestID string) (*models.ServiceRequest, error) {
+	return u.serviceRequestRepo.GetServiceRequestByID(ctx, serviceRequestID)
+}
+
+func (u *ServiceRequestUsecase) AttachFileToServiceRequest(ctx context.Context, serviceRequestID string, attachment *models.ServiceRequestAttachment) error {
+	serviceRequest, err := u.serviceRequestRepo.GetServiceRequestByID(ctx, serviceRequestID)
+	if err != nil {
+		return errors.New("service request not found")
+	}
+	attachment.ID = uuid.New().String()
+	attachment.ServiceRequestID = serviceRequest.ID
+	attachment.UploadedAt = time.Now()
+
+	return u.attachmentRepo.CreateAttachment(ctx, attachment)
+}
+
+func (u *ServiceRequestUsecase) GetAttachmentsByServiceRequestID(ctx context.Context, serviceRequestID string) ([]*models.ServiceRequestAttachment, error) {
+	return u.attachmentRepo.GetAttachmentsByRequestID(ctx, serviceRequestID)
 }

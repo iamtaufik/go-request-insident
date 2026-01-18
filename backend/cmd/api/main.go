@@ -35,8 +35,10 @@ func main() {
     authUsecase := usecase.NewAuthUseCase(userRepo, userSessionRepo, appLogger)
     authHandler := handlers.NewAuthHandler(authUsecase)
 
+    attachmentRepo := repository.NewAttachmentRepository(mysql, cache)
+
     serviceRequestRepo := repository.NewServiceRequestRepository(mysql, cache)
-    serviceRequesUseCase := usecase.NewServiceRequestUsecase(serviceRequestRepo)
+    serviceRequesUseCase := usecase.NewServiceRequestUsecase(serviceRequestRepo,  attachmentRepo)
     serviceRequestHandler := handlers.NewServiceRequestHandler(serviceRequesUseCase)
 
     routes.RegisterRoutes(app, &routes.RouteConfig{

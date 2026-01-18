@@ -1,8 +1,8 @@
 package middlewares
 
 import (
+	"be-request-insident/internal/config"
 	"be-request-insident/utility"
-	"os"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,7 +15,7 @@ func JWTProtected() fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing or malformed token"})
 		}
 
-		claims, err := utility.ParseToken(accessToken, os.Getenv("JWT_SECRET_KEY"))
+		claims, err := utility.ParseToken(accessToken, config.GetEnvVariable("JWT_SECRET_KEY"))
 
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid or expired token"})
