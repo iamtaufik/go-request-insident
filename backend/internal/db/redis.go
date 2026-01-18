@@ -24,7 +24,6 @@ func ConnectRedis() *redis.Client {
         Password: "", // no password set
         DB:       db,  
     })
-    defer rdb.Close()
 
 	if err := rdb.Ping(context.Background()).Err(); err != nil {
 		log.Fatal("Failed to connect to Redis:", err)

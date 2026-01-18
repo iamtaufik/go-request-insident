@@ -6,6 +6,7 @@ import (
 	"be-request-insident/internal/usecase"
 	"be-request-insident/internal/usecase/mocks"
 	"be-request-insident/utility"
+	"context"
 	"testing"
 )
 
@@ -17,7 +18,7 @@ func TestAuthUsecase_Login_Success(t *testing.T) {
 	hashed := utility.HashPassword("secret123")
 
 	mockRepo := &mocks.UserRepoMock{
-		GetUserByUsernameFn: func(username string) (*models.User, error) {
+		GetUserByUsernameFn: func(ctx context.Context, username string) (*models.User, error) {
 			if username != "test@mail.com" {
 				t.Fatalf("unexpected username: %s", username)
 			}
@@ -29,7 +30,21 @@ func TestAuthUsecase_Login_Success(t *testing.T) {
 		},
 	}
 
-	uc := usecase.NewAuthUseCase(mockRepo, logger.NoopLogger{})
+	mockUserSessionRepo := &mocks.UserSessionMock{
+		GetSessionByUserIDFn: func(ctx context.Context, userID string) (*models.UserSession, error) {
+			if userID != "user-1" {
+				t.Fatalf("unexpected userID: %s", userID)
+			}
+
+			return nil, nil
+		},
+		CreateSessionFn: func(ctx context.Context, session *models.UserSession) error {
+			return nil
+		},
+
+	}
+
+	uc := usecase.NewAuthUseCase(mockRepo, mockUserSessionRepo, logger.NoopLogger{})
 
 	access, refresh, err := uc.Login(t.Context(), "test@mail.com", "secret123")
 
@@ -49,7 +64,7 @@ func TestAuthUsecase_Login_InvalidPassword(t *testing.T) {
 	hashed := utility.HashPassword("rightpass")
 
 	mockRepo := &mocks.UserRepoMock{
-		GetUserByUsernameFn: func(username string) (*models.User, error) {
+		GetUserByUsernameFn: func(ctx context.Context, username string) (*models.User, error) {
 			if username != "test@mail.com" {
 				t.Fatalf("unexpected username: %s", username)
 			}
@@ -61,7 +76,20 @@ func TestAuthUsecase_Login_InvalidPassword(t *testing.T) {
 		},
 	}
 
-	uc := usecase.NewAuthUseCase(mockRepo, logger.NoopLogger{})
+	mockUserSessionRepo := &mocks.UserSessionMock{
+		GetSessionByUserIDFn: func(ctx context.Context, userID string) (*models.UserSession, error) {
+			if userID != "user-1" {
+				t.Fatalf("unexpected userID: %s", userID)
+			}
+		
+			return nil, nil
+		},
+		CreateSessionFn: func(ctx context.Context, session *models.UserSession) error {
+			return nil
+		},
+	}
+
+	uc := usecase.NewAuthUseCase(mockRepo, mockUserSessionRepo, logger.NoopLogger{})
 
 	_, _, err := uc.Login(t.Context(),"test@mail.com", "wrongpass")
 	if err == nil || err.Error() != "invalid credentials" {

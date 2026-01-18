@@ -66,7 +66,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 func (h *AuthHandler) Me(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
 
-	user, err := h.UseCase.Me(userID)
+	user, err := h.UseCase.Me(c.Context(), userID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "failed to fetch user data",

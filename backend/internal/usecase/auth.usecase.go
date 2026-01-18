@@ -25,7 +25,7 @@ func NewAuthUseCase(userRepo repository.UserRepository, sessionRepo repository.U
 }
 
 func (u *AuthUsecase) Login(ctx context.Context, username, password string) (string, string, error) {
-	user, err := u.userRepo.GetUserByUsername(username)
+	user, err := u.userRepo.GetUserByUsername(ctx, username)
 
 	if err != nil {
 		return "", "", err
@@ -36,7 +36,7 @@ func (u *AuthUsecase) Login(ctx context.Context, username, password string) (str
 		return "", "", errors.New("user not found")
 	}
 
-	session, _ := u.sessionRepo.GetSessionByUserID(user.ID)
+	session, _ := u.sessionRepo.GetSessionByUserID(ctx, user.ID)
 
 	isMatch := utility.CheckPasswordHash(password, user.Password)
 
@@ -68,7 +68,7 @@ func (u *AuthUsecase) Login(ctx context.Context, username, password string) (str
 	refreshExp := time.Now().Add(7 * 24 * time.Hour)
 
     if session == nil {
-        err = u.sessionRepo.CreateSession(&models.UserSession{
+        err = u.sessionRepo.CreateSession(ctx, &models.UserSession{
             UserID:           user.ID,
             SessionID:        sessionID,
             RefreshTokenHash: refreshToken,
@@ -83,7 +83,7 @@ func (u *AuthUsecase) Login(ctx context.Context, username, password string) (str
 		}
 
     } else {
-        err = u.sessionRepo.UpdateSessionByUserID(user.ID, &models.UserSession{
+        err = u.sessionRepo.UpdateSessionByUserID(ctx, user.ID, &models.UserSession{
             SessionID:        sessionID,
             RefreshTokenHash: refreshToken,
             Status:           "ACTIVE",
@@ -101,8 +101,8 @@ func (u *AuthUsecase) Login(ctx context.Context, username, password string) (str
 	return accessToken, refreshToken, nil 
 }
 
-func (u *AuthUsecase) Me(userID string) (*models.User, error) {
-	user, err := u.userRepo.GetUserByID(userID)
+func (u *AuthUsecase) Me(ctx context.Context,userID string) (*models.User, error) {
+	user, err := u.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
@@ -110,7 +110,7 @@ func (u *AuthUsecase) Me(userID string) (*models.User, error) {
 }
 
 func (u *AuthUsecase) Logout(ctx context.Context, userID string) error {
-	session, err := u.sessionRepo.GetSessionByUserID(userID)
+	session, err := u.sessionRepo.GetSessionByUserID(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (u *AuthUsecase) Logout(ctx context.Context, userID string) error {
 	session.Status = "INACTIVE"
 	session.RevokedAt = &now
 
-	err = u.sessionRepo.UpdateSession(session)
+	err = u.sessionRepo.UpdateSession(ctx, session)
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func (u *AuthUsecase) Logout(ctx context.Context, userID string) error {
 }
 
 func (u *AuthUsecase) RefreshToken(ctx context.Context, userID, refreshToken string) (string, string, error) {
-	session, err := u.sessionRepo.GetSessionByUserID(userID)
+	session, err := u.sessionRepo.GetSessionByUserID(ctx, userID)
 	if err != nil {
 		return "", "", err
 	}
@@ -172,7 +172,7 @@ func (u *AuthUsecase) RefreshToken(ctx context.Context, userID, refreshToken str
 	session.RefreshExpiresAt = time.Now().Add(7 * 24 * time.Hour)
 	session.LastSeenAt = time.Now()
 
-	err = u.sessionRepo.UpdateSession(session)
+	err = u.sessionRepo.UpdateSession(ctx, session)
 	if err != nil {
 		return "", "", err
 	}

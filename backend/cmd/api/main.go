@@ -23,18 +23,25 @@ func main() {
     mysql := db.ConnectMysql()
     mongo := db.ConnectMongo()
     redis := db.ConnectRedis()
+    cache := repository.NewRedisCache(redis)
 
     appLogger := logger.NewAppLogger(
         mongo.DB.Collection("app_logs"),
         "app_logs",
     )
-    userRepo := repository.NewUserRepository(mysql, redis)
-    userSessionRepo := repository.NewUserSessionRepository(mysql, redis)
+    userRepo := repository.NewUserRepository(mysql, cache)
+    userSessionRepo := repository.NewUserSessionRepository(mysql, cache)
+
     authUsecase := usecase.NewAuthUseCase(userRepo, userSessionRepo, appLogger)
     authHandler := handlers.NewAuthHandler(authUsecase)
 
+    serviceRequestRepo := repository.NewServiceRequestRepository(mysql, cache)
+    serviceRequesUseCase := usecase.NewServiceRequestUsecase(serviceRequestRepo)
+    serviceRequestHandler := handlers.NewServiceRequestHandler(serviceRequesUseCase)
+
     routes.RegisterRoutes(app, &routes.RouteConfig{
         AuthHandler: authHandler,
+        ServiceRequestHandler: serviceRequestHandler,
     })
 
     app.Get("/", func (c *fiber.Ctx) error {
