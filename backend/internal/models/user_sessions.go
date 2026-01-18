@@ -13,7 +13,7 @@ type UserSession struct {
 	UserAgent        string    `gorm:"column:user_agent" json:"user_agent"`
 	CreatedAt        time.Time `gorm:"column:created_at;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 	LastSeenAt       time.Time `gorm:"column:last_seen_at" json:"last_seen_at"`
-	RevokedAt        time.Time `gorm:"column:revoked_at" json:"revoked_at"`
+	RevokedAt        *time.Time `gorm:"column:revoked_at" json:"revoked_at"`
 	ExpiresAt        time.Time `gorm:"column:expires_at" json:"expires_at"`
 
 	User             User      `gorm:"foreignKey:UserID;references:ID"`

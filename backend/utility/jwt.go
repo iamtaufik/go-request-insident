@@ -2,6 +2,7 @@ package utility
 
 import (
 	"be-request-insident/internal/config"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -41,4 +42,19 @@ func ParseToken(tokenString, secretKey string) (jwt.MapClaims, error) {
 	}
 
 	return nil, jwt.ErrTokenInvalidClaims
+}
+
+func GetStringClaim(claims map[string]any, key string) (string, bool) {
+    v, ok := claims[key]
+    if !ok || v == nil {
+        return "", false
+    }
+    switch t := v.(type) {
+    case string:
+        return t, true
+    case fmt.Stringer:
+        return t.String(), true
+    default:
+        return fmt.Sprintf("%v", t), true
+    }
 }

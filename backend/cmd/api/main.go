@@ -29,7 +29,8 @@ func main() {
         "app_logs",
     )
     userRepo := repository.NewUserRepository(mysql, redis)
-    authUsecase := usecase.NewAuthUseCase(userRepo, appLogger)
+    userSessionRepo := repository.NewUserSessionRepository(mysql, redis)
+    authUsecase := usecase.NewAuthUseCase(userRepo, userSessionRepo, appLogger)
     authHandler := handlers.NewAuthHandler(authUsecase)
 
     routes.RegisterRoutes(app, &routes.RouteConfig{
