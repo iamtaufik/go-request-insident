@@ -13,15 +13,14 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type AuthUsecase struct {
-	userRepo repository.UserRepository
+	userRepo    repository.UserRepository
 	sessionRepo repository.UserSessionRepository
-	appLog logger.Logger
+	appLog      logger.Logger
 }
 
 func NewAuthUseCase(userRepo repository.UserRepository, sessionRepo repository.UserSessionRepository, appLog logger.Logger) *AuthUsecase {
-	return &AuthUsecase{userRepo: userRepo, sessionRepo: sessionRepo,appLog: appLog}
+	return &AuthUsecase{userRepo: userRepo, sessionRepo: sessionRepo, appLog: appLog}
 }
 
 func (u *AuthUsecase) Login(ctx context.Context, username, password string) (string, string, error) {
@@ -30,7 +29,6 @@ func (u *AuthUsecase) Login(ctx context.Context, username, password string) (str
 	if err != nil {
 		return "", "", err
 	}
-
 
 	if user == nil {
 		return "", "", errors.New("user not found")
@@ -67,41 +65,41 @@ func (u *AuthUsecase) Login(ctx context.Context, username, password string) (str
 
 	refreshExp := time.Now().Add(7 * 24 * time.Hour)
 
-    if session == nil {
-        err = u.sessionRepo.CreateSession(ctx, &models.UserSession{
-            UserID:           user.ID,
-            SessionID:        sessionID,
-            RefreshTokenHash: refreshToken,
-            Status:           "ACTIVE",
-            RefreshExpiresAt: refreshExp,
-            LastSeenAt:       time.Now(),
-            RevokedAt:        nil,
-            ExpiresAt:        refreshExp,
-        })
+	if session == nil {
+		err = u.sessionRepo.CreateSession(ctx, &models.UserSession{
+			ID:               uuid.New().String(),
+			UserID:           user.ID,
+			SessionID:        sessionID,
+			RefreshTokenHash: refreshToken,
+			Status:           "ACTIVE",
+			RefreshExpiresAt: refreshExp,
+			LastSeenAt:       time.Now(),
+			RevokedAt:        nil,
+			ExpiresAt:        refreshExp,
+		})
 		if err != nil {
 			return "", "", err
 		}
 
-    } else {
-        err = u.sessionRepo.UpdateSessionByUserID(ctx, user.ID, &models.UserSession{
-            SessionID:        sessionID,
-            RefreshTokenHash: refreshToken,
-            Status:           "ACTIVE",
-            RefreshExpiresAt: refreshExp,
-            LastSeenAt:       time.Now(),
-            RevokedAt:        nil,
-            ExpiresAt:        refreshExp,
-        })
+	} else {
+		err = u.sessionRepo.UpdateSessionByUserID(ctx, user.ID, &models.UserSession{
+			SessionID:        sessionID,
+			RefreshTokenHash: refreshToken,
+			Status:           "ACTIVE",
+			RefreshExpiresAt: refreshExp,
+			LastSeenAt:       time.Now(),
+			RevokedAt:        nil,
+			ExpiresAt:        refreshExp,
+		})
 		if err != nil {
 			return "", "", err
 		}
-    }
+	}
 
-
-	return accessToken, refreshToken, nil 
+	return accessToken, refreshToken, nil
 }
 
-func (u *AuthUsecase) Me(ctx context.Context,userID string) (*models.User, error) {
+func (u *AuthUsecase) Me(ctx context.Context, userID string) (*models.User, error) {
 	user, err := u.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
 		return nil, errors.New("user not found")
@@ -129,8 +127,8 @@ func (u *AuthUsecase) Logout(ctx context.Context, userID string) error {
 	}
 
 	u.appLog.Log(ctx, logger.AppLog{
-		TS: 	  time.Now(),
-		Event:    "LOGOUT_SUCCESS",
+		TS:      time.Now(),
+		Event:   "LOGOUT_SUCCESS",
 		Level:   logger.INFO,
 		Service: "auth",
 		Message: "user logged out successfully",
